@@ -1,0 +1,374 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <title>贪吃---sd man！</title>
+    <style>
+        *{
+            padding: 0;
+            margin: 0;
+        }
+
+        .nav{
+            width: 180px;
+            height: 320px;
+            background: #ff5000;
+            position: absolute;
+            top: 50px;
+            right: calc(50% - 400px);
+            text-align: center;
+        }
+
+        button{
+            width: 160px;
+            height: 80px;
+            margin: 5px 5px;
+        }
+
+        span{
+            margin-top: 20px;
+            font-size: 30px;
+        }
+
+        input{
+            width: 140px;
+            height: 60px;
+            font-size: 30px;
+            text-align: center;
+
+        }
+
+        .border{
+            border: 10px solid violet;
+            background-color: lightblue;
+            width: 600px;
+            height: 600px;
+            position: relative;
+            left: 50%;
+            top:20px;
+            margin-left: -400px;
+        }
+
+        .sdhead{
+            display: block;
+            background-image: url("https://scpic.chinaz.net/Files/pic/icons128/8090/m6.png");
+            background-size: 20px;
+            background-repeat: no-repeat;
+        }
+
+        .sdbody{
+            display: block;
+            background-image: url("https://scpic.chinaz.net/Files/pic/icons128/8090/m4.png");
+            background-size: 20px;
+            background-repeat: no-repeat;
+        }
+
+
+        .sdfood{
+            display: block;
+            background-image: url("https://scpic.chinaz.net/Files/pic/icons128/8090/m8.png");
+            background-size: 20px;
+            background-repeat: no-repeat;
+        }
+        .sdfood1{
+            display: block;
+            background-image: url("https://scpic.chinaz.net/Files/pic/icons128/8090/m14.png");
+            background-size: 20px;
+            background-repeat: no-repeat;
+        }
+    </style>
+</head>
+<body>
+<div class="nav">
+    <button class="start">重新开始</button>
+    <button class="pause" style="width: 70px">暂停</button>
+    <button class="goon" style="width: 70px">继续</button>
+    <span>分数：</span><input type="text" value="0">
+    <p>键盘←,↑.→.↓控制方向</p>
+</div>
+
+<div class="border"></div>
+
+
+<script>
+    var wx = 20,
+        hx = 20,
+        row = 30,
+        col = 30;
+
+
+
+    function Square(x, y, classname) {
+        this.x = x * wx;
+        this.y = y * hx;
+        this.name = classname;
+
+
+        this.newnode = document.createElement('div');
+        this.newnode.className = this.name;
+        this.parent = document.getElementsByClassName('border')[0];
+
+    }
+
+    Square.prototype.create = function () {
+        this.newnode.style.position = 'absolute';
+        this.newnode.style.width = wx + 'px';
+        this.newnode.style.height = hx +'px';
+        this.newnode.style.left = this.x + 'px';
+        this.newnode.style.top = this.y + 'px';
+        this.parent.appendChild(this.newnode);
+    }
+
+    Square.prototype.removeNode = function () {
+        this.parent.removeChild(this.newnode);
+    }
+
+
+    function Sdman() {
+        this.head = null;
+        this.tail = null;
+        this.pos = [];
+
+        this.directionNum = {
+            left:{
+                x:-1,
+                y: 0,
+                rot: 0
+            },
+            right:{
+                x: 1,
+                y: 0,
+                rot: 0
+            },
+            up:{
+                x: 0,
+                y: -1,
+                rot: 0
+            },
+            down:{
+                x: 0,
+                y: 1,
+                rot: 0
+            }
+        };
+    }
+
+    Sdman.prototype.init = function () {
+        var sdhead = new Square(2, 0, 'sdhead');
+        sdhead.create();
+        this.head = sdhead;
+        this.pos.push([2,0]);
+
+        var sdbody1 = new Square(1, 0, 'sdbody');
+        sdbody1.create();
+        this.pos.push([1, 0]);
+
+        var sdbody2 = new Square(0, 0, 'sdbody');
+        sdbody2.create();
+        this.tail = sdbody2;
+        this.pos.push([0, 0]);
+
+        this.direction = this.directionNum.right;
+
+        // 创建一个链表的形式来处理整个结构
+        sdhead.pre = null;
+        sdhead.next = sdbody1;
+
+        sdbody1.pre = sdhead;
+        sdbody1.next = sdbody2;
+
+        sdbody2.pre = sdbody1;
+        sdbody2.next = null;
+    }
+
+    Sdman.prototype.getNextPos = function () {
+        var nextPos = [
+            this.head.x / wx + this.direction.x,
+            this.head.y / hx + this.direction.y
+        ]
+
+
+        // 分情况1.下一个位置是自己的身体
+        var headflag = false;
+        this.pos.forEach(function (value) {
+            if (value[0] == nextPos[0] && value[1] == nextPos[1]){
+                headflag = true;
+            }
+        })
+        if (headflag == true){
+            console.log('撞到自己了');
+            this.stateOfsdman.die.call(this);
+            return;
+        }
+
+        // 2.是墙，超过位置
+        if(nextPos[0] < 0 || nextPos[1] <0 || nextPos[0] > row-1 || nextPos[1] > col-1){
+            console.log('撞到墙了');
+            this.stateOfsdman.die.call(this);
+        }
+
+
+        // 3.是gift可以吃掉
+        if (food && food.pos[0] == nextPos[0] && food.pos[1] == nextPos[1]){
+            console.log('chi!!!');
+            this.stateOfsdman.eat.call(this);
+        }
+
+
+
+        // 4.啥都没有，走
+        this.stateOfsdman.move.call(this);
+    }
+
+    Sdman.prototype.stateOfsdman =  {
+        move:function(formet) {
+            var newbody = new Square(this.head.x/wx,this.head.y/hx,'sdbody');
+
+
+            newbody.next = this.head.next;
+            newbody.next.pre = newbody;
+            newbody.pre = null;
+
+            this.head.removeNode();
+            newbody.create();
+
+            var newhead = new Square( this.head.x / wx + this.direction.x,this.head.y / hx + this.direction.y,'sdhead');
+
+            newhead.next = newbody;
+            newhead.pre = null;
+            newbody.pre = newhead;
+            newhead.newnode.style.transform = "rotate(" + this.direction.rot + "deg)";
+            newhead.create();
+
+            this.pos.splice(0,0,[this.head.x / wx + this.direction.x,this.head.y / hx + this.direction.y]);
+            this.head = newhead;
+
+
+            if (!formet){
+                this.tail.removeNode();
+
+                this.tail = this.tail.pre;
+                this.tail.next = null;
+                this.pos.pop();
+
+            }
+            // console.log('move')
+        },
+        eat:function() {
+            this.stateOfsdman.move.call(this,true);
+            food.removeNode();
+            game.socer++;
+            inputNode.value = game.socer;
+            creatFood();
+            // console.log('eat')
+        },
+        die:function(){
+            game.over();
+            alert('game over! your socer is:' + game.socer);
+            console.log('die')
+        }
+
+    }
+
+
+    function creatFood() {
+        var x = null;
+        var y = null;
+        var ttye =Math.random();
+
+        var incule = true;
+        while(incule){
+            x = Math.round(Math.random()*(row-1));
+            y = Math.round(Math.random()*(col-1));
+
+            sdman.pos.forEach(function (value) {
+                if(x != value[0] && y != value[1]){
+                    incule = false;
+                }
+            });
+        }
+        if (ttye < 0.5){food = new Square(x,y,'sdfood');
+        }else{
+            food = new Square(x,y,'sdfood1');
+        }
+
+        food.pos = [x,y];
+        food.create();
+    }
+
+
+
+    function Game() {
+        this.time = null;
+        this.socer = 0;
+
+    }
+
+    Game.prototype.init =function () {
+
+        sdman.init();
+
+        // sdman.getNextPos();
+
+
+        creatFood();
+
+        document.body.onkeydown = function (ev) {
+            let keys = ev.which;
+            if (keys == 37 && sdman.direction != sdman.directionNum.right){
+                sdman.direction = sdman.directionNum.left;
+            }else if(keys == 39 && sdman.direction != sdman.directionNum.left){
+                sdman.direction = sdman.directionNum.right;
+            }else if(keys == 38 && sdman.direction != sdman.directionNum.down){
+                sdman.direction = sdman.directionNum.up;
+            }else if(keys == 40 && sdman.direction != sdman.directionNum.up){
+                sdman.direction = sdman.directionNum.down;
+            }
+            // console.log(sdman.direction);
+        }
+
+        this.start();
+    }
+
+    Game.prototype.start = function () {
+        this.timer1 = setInterval(function () {
+            sdman.getNextPos();
+        },200)
+
+    }
+    Game.prototype.over = function () {
+
+        var allNode = document.getElementsByClassName('border')[0];
+        allNode.innerHTML = "";
+        clearInterval(this.timer1);
+        sdman = new Sdman();
+        game = new Game();
+        game.init();
+
+    }
+
+    var sdman = new Sdman();
+    var game = new Game();
+
+
+    var startNode = document.getElementsByClassName('start')[0];
+    var goonNode = document.getElementsByClassName('goon')[0];
+    var pauseNode = document.getElementsByClassName('pause')[0];
+    var inputNode = document.getElementsByTagName('input')[0];
+
+
+    startNode.onclick = function(){
+        game.over();
+    }
+
+    pauseNode.onclick = function () {
+        clearInterval(game.timer1);
+    }
+
+    goonNode.onclick = function () {
+        game.start();
+    }
+</script>
+
+</body>
+</html>

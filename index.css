@@ -1,0 +1,70 @@
+*{
+    padding: 0;
+    margin: 0;
+}
+
+
+#border{
+    border: 10px solid violet;
+    background-color: lightblue;
+    width: 900px;
+    height: 900px;
+    position: relative;
+    left: 50%;
+    top:20px;
+    margin-left: -400px;
+}
+
+
+.shange{
+    list-style: none;
+}
+
+.shange li{
+    width: 30px;
+    height: 30px;
+    float: left;
+    border: 1px solid #ff5000;
+    box-sizing: border-box;
+}
+
+.clearfix:after{
+    content: "";
+    display: block;
+    clear: both;
+}
+
+.active{
+    background-image: url("gameimg/m14.png");
+    background-repeat: no-repeat;
+    background-size: 30px;
+}
+
+
+
+/*头部*/
+.head{
+    width: 30px;
+    height: 30px;
+    display: block;
+    background-image: url("gameimg/m6.png");
+    background-size: 30px;
+    background-repeat: no-repeat;
+    position: absolute;
+    left: 200px;
+    top: 100px;
+}
+
+.sdbody{
+    width: 30px;
+    height: 30px;
+    display: block;
+    background-image: url("gameimg/m4.png");
+    background-size: 30px;
+    background-repeat: no-repeat;
+    position: absolute;
+    left: 200px;
+    top: 100px;
+
+}
+
